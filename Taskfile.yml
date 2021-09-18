@@ -5,24 +5,41 @@ version: '3'
 env:
   JAR_FILE: mock_unix_shell.jar
   IMAGE_NAME: mockunixshell:latest
+  TEST_IMAGE_NAME: mockunixshell-tests:latest
 
 tasks:
   docker-build:
     desc: Builds the docker image
-    sources: 
-      - commands/*.java  
-      - driver/*.java  
-      - Exceptions/*.java  
-      - fileSystem/*.java  
-      - inputOutput/*.java
-      - Dockerfile  
+    # sources: 
+    #   - commands/*.java  
+    #   - driver/*.java  
+    #   - Exceptions/*.java  
+    #   - fileSystem/*.java  
+    #   - inputOutput/*.java
+    #   - Dockerfile  
     cmds:
       - docker build
           --tag {{.IMAGE_NAME}}
           .
+  
+  docker-test:
+    desc: Builds the docker image for JUnit 4 testing
+    # sources: 
+    #   - commands/*.java  
+    #   - driver/*.java  
+    #   - Exceptions/*.java  
+    #   - fileSystem/*.java  
+    #   - inputOutput/*.java
+    #   - test/*.java
+    #   - test/Dockerfile  
+    cmds:
+      - docker build
+          --file test/Dockerfile
+          --tag {{.TEST_IMAGE_NAME}}
+          .
 
   clean:
-    desc: Removes all *.class and .jar files
+    desc: Removes all *.class and *.jar files
     cmds:
       - find . 
           -type f 
@@ -95,3 +112,48 @@ tasks:
           --tty 
           --entrypoint bash 
           {{.IMAGE_NAME}}
+
+  test-compile:
+    desc: Compile JUnit4 tests locally
+    cmds:
+      - javac 
+          -verbose 
+          -Xlint:deprecation 
+          -classpath .:/usr/share/java/junit4.jar 
+          test/*.java
+
+  test-run:
+    desc: Run JUnit4 tests locally
+    deps:
+      - test-compile
+    vars:
+      TEST_LIST:
+        sh: ls test/ 
+              | grep --invert-match Dockerfile 
+              | xargs -I {} -n 1 basename {} .java 
+              | sed -e 's/^/test./'
+              | tr '\n' ' '
+    cmds:
+      - java 
+          -classpath 
+          .:/usr/share/java/junit4.jar 
+          org.junit.runner.JUnitCore 
+          {{.TEST_LIST}}
+
+  bash-into-test:
+    desc: Run bash for the docker test container
+    deps: 
+      - docker-test
+    cmds:
+      - docker run 
+          --interactive 
+          --tty 
+          --entrypoint bash 
+          {{.TEST_IMAGE_NAME}}
+  
+  test-docker:
+    desc: Run JUnit4 tests in docker
+    deps:
+      - docker-test
+    cmds:
+      - docker run {{.TEST_IMAGE_NAME}}
