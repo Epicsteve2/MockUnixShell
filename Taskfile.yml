@@ -1,0 +1,51 @@
+version: '3'
+
+tasks:
+  docker-build:
+    desc: Builds the docker image
+    cmds:
+      - docker build
+          --tag mockunixshell:latest
+          .
+  clean:
+    desc: Removes all *.class files
+    cmds:
+      - find . 
+          -type f 
+          -name "*.class" 
+          -exec 
+            rm -vf {} \;
+
+  compile:
+    desc: Compile all *.java to *.class
+    cmds:
+      - javac -Xlint:unchecked driver/JShell.java
+
+  jar:
+    desc: Compile all *.class to mock_unix_shell.jar
+    cmds:
+      - jar cvfe mock_unix_shell.jar driver.JShell **/*.class 
+
+  run-jar:
+    desc: Execute application using mock_unix_shell.jar
+    cmds:
+      - java -classpath mock_unix_shell.jar driver.JShell
+
+  run-class:
+    desc: Execute application using driver/JShell.class
+    cmds:
+      - java driver/JShell
+
+  run-docker:
+    desc: Execute application using docker
+    cmds:
+      - docker run mockunixshell:latest
+
+  bash-into-docker:
+    desc: Run bash for the docker container
+    cmds:
+      - docker run 
+          --interactive 
+          --tty 
+          --entrypoint bash 
+          mockunixshell:latest
