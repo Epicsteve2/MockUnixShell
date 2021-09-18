@@ -20,7 +20,7 @@ tasks:
       - docker build
           --tag {{.IMAGE_NAME}}
           .
-          
+
   clean:
     desc: Removes all *.class and .jar files
     cmds:
@@ -49,7 +49,7 @@ tasks:
     cmds:
       - javac -verbose -Xlint:unchecked driver/JShell.java
 
-  jar:
+  build-jar:
     desc: Compile all *.class to {{.JAR_FILE}}
     deps: 
       - compile

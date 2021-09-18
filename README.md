@@ -11,6 +11,14 @@ The project was compiled using `Java OpenJDK 11`
 The test files were run on `JUnit 4.11`
 
 # Running the project
-To run the mock shell, run `driver/JShell.java`
+There are 3 methods to run the app
+
+This project uses [go-task](https://taskfile.dev/), which is a modern replacement for GNU Make
+
+1. ```task run-jar```: Generates a jar file and executes it
+2. ```task run-class```: Compiles to JVM byte code and runs it
+3. ```task run-docker```: Builds a docker image and runs it
+  
+Or you can run `driver/JShell.java` in a Java IDE
 
 Usable commands are provided in `commands.pdf`
