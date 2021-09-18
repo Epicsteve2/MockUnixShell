@@ -6,8 +6,7 @@ RUN apt update && \
 WORKDIR /app
 COPY . /app
 
-RUN task compile && \
-    task jar
+RUN task jar
 
 FROM openjdk:11.0.12-jre-slim-bullseye
 

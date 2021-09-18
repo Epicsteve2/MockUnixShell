@@ -1,51 +1,97 @@
+# https://taskfile.dev
+
 version: '3'
+
+env:
+  JAR_FILE: mock_unix_shell.jar
+  IMAGE_NAME: mockunixshell:latest
 
 tasks:
   docker-build:
     desc: Builds the docker image
+    sources: 
+      - commands/*.java  
+      - driver/*.java  
+      - Exceptions/*.java  
+      - fileSystem/*.java  
+      - inputOutput/*.java
+      - Dockerfile  
     cmds:
       - docker build
-          --tag mockunixshell:latest
+          --tag {{.IMAGE_NAME}}
           .
+          
   clean:
-    desc: Removes all *.class files
+    desc: Removes all *.class and .jar files
     cmds:
       - find . 
           -type f 
           -name "*.class" 
           -exec 
             rm -vf {} \;
+      - rm -vf {{.JAR_FILE}}
 
+  # Ideally, this compiles every file individually. This would make ignoring non-changed files easier
   compile:
     desc: Compile all *.java to *.class
+    sources: 
+      - commands/*.java  
+      - driver/*.java  
+      - Exceptions/*.java  
+      - fileSystem/*.java  
+      - inputOutput/*.java  
+    generates: 
+      - commands/*.class  
+      - driver/*.class  
+      - Exceptions/*.class  
+      - fileSystem/*.class  
+      - inputOutput/*.class  
     cmds:
-      - javac -Xlint:unchecked driver/JShell.java
+      - javac -verbose -Xlint:unchecked driver/JShell.java
 
   jar:
-    desc: Compile all *.class to mock_unix_shell.jar
+    desc: Compile all *.class to {{.JAR_FILE}}
+    deps: 
+      - compile
+    sources: 
+      - commands/*.class  
+      - driver/*.class  
+      - Exceptions/*.class  
+      - fileSystem/*.class  
+      - inputOutput/*.class 
+    generates:
+      - '{{.JAR_FILE}}'
     cmds:
-      - jar cvfe mock_unix_shell.jar driver.JShell **/*.class 
+      - jar cvfe {{.JAR_FILE}} driver.JShell **/*.class 
 
   run-jar:
-    desc: Execute application using mock_unix_shell.jar
+    desc: Execute application using {{.JAR_FILE}}
+    deps: 
+      - jar
     cmds:
-      - java -classpath mock_unix_shell.jar driver.JShell
+      - java -classpath {{.JAR_FILE}} driver.JShell
 
   run-class:
     desc: Execute application using driver/JShell.class
+    deps: 
+      - compile
     cmds:
       - java driver/JShell
 
   run-docker:
     desc: Execute application using docker
+    deps: 
+      - docker-build
     cmds:
-      - docker run mockunixshell:latest
+      - docker run --interactive {{.IMAGE_NAME}}
 
   bash-into-docker:
     desc: Run bash for the docker container
+    deps: 
+      - docker-build
     cmds:
       - docker run 
           --interactive 
           --tty 
           --entrypoint bash 
-          mockunixshell:latest
+          {{.IMAGE_NAME}}
