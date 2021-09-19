@@ -13,4 +13,4 @@ FROM openjdk:11.0.12-jre-slim-bullseye
 
 WORKDIR /app
 COPY --from=install /app/mock_unix_shell.jar /app/mock_unix_shell.jar 
-CMD java -classpath mock_unix_shell.jar driver.JShell
+CMD java -jar mock_unix_shell.jar

@@ -90,7 +90,7 @@ tasks:
     deps: 
       - build-jar
     cmds:
-      - java -classpath {{.JAR_FILE}} driver.JShell
+      - java -jar {{.JAR_FILE}}
 
   run-class:
     desc: Execute application using driver/JShell.class
