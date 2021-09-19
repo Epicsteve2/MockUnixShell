@@ -12,10 +12,6 @@ env:
   JAVA_CLASSES: commands/*.class driver/*.class Exceptions/*.class fileSystem/*.class inputOutput/*.class
 
 tasks:
-  test: 
-    desc: test
-    cmds:
-      - echo '{{.JAVA_FILES}}'
   docker-build:
     desc: Builds the docker image
     # sources: 
@@ -137,7 +133,10 @@ tasks:
     vars:
       TEST_LIST:
         sh: ls test/ 
-              | grep --invert-match Dockerfile 
+              | grep 
+                --invert-match 
+                --regexp "Dockerfile" 
+                --regexp "\.class$" 
               | xargs -I {} -n 1 basename {} .java 
               | sed -e 's/^/test./'
               | tr '\n' ' '
@@ -162,6 +161,7 @@ tasks:
       - docker run 
           --interactive 
           --tty 
+          --rm 
           --entrypoint bash 
           {{.TEST_IMAGE_NAME}}
   
