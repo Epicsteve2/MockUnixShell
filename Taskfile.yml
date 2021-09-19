@@ -6,8 +6,16 @@ env:
   JAR_FILE: mock_unix_shell.jar
   IMAGE_NAME: mockunixshell:latest
   TEST_IMAGE_NAME: mockunixshell-tests:latest
+  
+  # There's definitely a better way.
+  JAVA_FILES: commands/*.java driver/*.java Exceptions/*.java fileSystem/*.java inputOutput/*.java
+  JAVA_CLASSES: commands/*.class driver/*.class Exceptions/*.class fileSystem/*.class inputOutput/*.class
 
 tasks:
+  test: 
+    desc: test
+    cmds:
+      - echo '{{.JAVA_FILES}}'
   docker-build:
     desc: Builds the docker image
     # sources: 
@@ -64,7 +72,7 @@ tasks:
       - fileSystem/*.class  
       - inputOutput/*.class  
     cmds:
-      - javac -verbose -Xlint:unchecked driver/JShell.java
+      - javac -verbose -Xlint:unchecked {{.JAVA_FILES}}
 
   build-jar:
     desc: Compile all *.class to {{.JAR_FILE}}
@@ -79,12 +87,12 @@ tasks:
     generates:
       - '{{.JAR_FILE}}'
     cmds:
-      - jar cvfe {{.JAR_FILE}} driver.JShell **/*.class 
+      - jar cvfe {{.JAR_FILE}} driver.JShell {{.JAVA_CLASSES}} 
 
   run-jar:
     desc: Execute application using {{.JAR_FILE}}
     deps: 
-      - jar
+      - build-jar
     cmds:
       - java -classpath {{.JAR_FILE}} driver.JShell
 
@@ -93,7 +101,7 @@ tasks:
     deps: 
       - compile
     cmds:
-      - java driver/JShell
+      - java driver.JShell
 
   run-docker:
     desc: Execute application using docker
@@ -139,6 +147,12 @@ tasks:
           .:/usr/share/java/junit4.jar 
           org.junit.runner.JUnitCore 
           {{.TEST_LIST}}
+    # ls test/ \
+    #   | grep --invert-match Dockerfile \
+    #   | xargs -I {} -n 1 basename {} .java \
+    #   | sed -e 's/^/test./' \
+    #   | tr '\n' ' ' \
+    #   | xargs --verbose java -classpath .:/usr/share/java/junit4.jar org.junit.runner.JUnitCore
 
   bash-into-test:
     desc: Run bash for the docker test container
