@@ -1,8 +1,8 @@
 FROM openjdk:11.0.12-jdk-slim-bullseye as install
-RUN apt update && \
-    apt install curl --yes && \
+RUN apt-get update && \
+    apt-get install --yes --no-install-recommends curl && \
     sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d && \
-    apt remove curl --yes
+    apt-get remove curl --yes
 
 WORKDIR /app
 COPY . /app

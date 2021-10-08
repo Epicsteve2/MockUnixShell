@@ -1,10 +1,10 @@
 FROM openjdk:11.0.12-jdk-slim-bullseye 
-RUN apt update && \
-    apt install curl --yes && \
+RUN apt-get update && \
+    apt-get install --yes --no-install-recommends curl junit4 && \
     sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d && \
-    apt remove curl --yes
-
-RUN apt install junit4 --yes
+    apt-get remove curl --yes && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY ../. /app
