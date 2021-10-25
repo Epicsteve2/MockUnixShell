@@ -1,6 +1,6 @@
 # MockUnixShell
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Epicsteve2/MockUnixShell/main/JShell.jpeg" alt="JShell">
+  <img src="JShell.jpeg" alt="JShell">
 </p>
 
 The group project I worked on in CSCB07 during Fall 2020 at UTSC. It was worked on in a group of four over the course of five weeks.
